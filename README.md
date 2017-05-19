@@ -13,7 +13,8 @@ __Status:__ Active
 - [ ] API endpoint
     - [x] Download talk page
     - [ ] Parse talk page
-        - [ ] 
+        - [ ] Parse classic talk pages
+        - [ ] Parse [Flow](https://www.mediawiki.org/wiki/Extension:Flow)-enabled talk pages
     - [ ] Tidy sentiment analysis
     - [ ] Anonymize and summarize
     - [ ] Output
