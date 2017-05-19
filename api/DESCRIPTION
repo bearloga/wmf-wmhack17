@@ -1,0 +1,26 @@
+Package: sentimentalk
+Type: Package
+Title: Sentiment Analysis of Talk Pages as Service
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Mikhail", "Popov", email = "mikhail@wikimedia.org",
+           role = c("aut", "cre"), comment = "@bearloga on Twitter"),
+    person("Wikimedia Foundation", role = "cph")
+    )
+Description: API for sentiment analysis of MediaWiki talk (discussion) pages
+    on MediaWiki-powered websites ('wikis').
+Depends: R (>= 3.1.0)
+Imports:
+    plumber (>= 0.3.1),
+    tidytext (>= 0.1.2),
+    jsonlite (>= 1.4),
+    WikipediR (>= 1.5.0),
+    xml2 (>= 1.1.1),
+    dplyr (>= 0.5.0)
+License: MIT + file LICENSE
+URL: http://github.com/bearloga/wmf-wmhack17/sentimentalk
+BugReports: http://github.com/bearloga/wmf-wmhack17/issues
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 6.0.1
