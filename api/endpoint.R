@@ -9,11 +9,11 @@ nrc <- sentiments[sentiments$lexicon == "nrc", c("word", "sentiment")]
 router <- plumber::plumber$new()
 
 endpoint_expression <- expression(
-  function(page_name = NULL, project = NULL, language = NULL, api = NULL, format = "condensed") {
+  function(page_name = NULL, project = NULL, language = NULL, api = NULL) {
     return(sentimentalk::process(
       page_name, project, language, api,
-      .lexicon = nrc, .json = format,
-      .format = "json", .silent = TRUE
+      .lexicon = nrc, .format = "json",
+      .silent = TRUE
     ))
   }
 )
@@ -24,4 +24,4 @@ router$addEndpoint(
   expr = endpoint_expression
 )
 
-router$run(port = 8000)
+router$run(port = 8080)

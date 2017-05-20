@@ -10,7 +10,6 @@
 #' @param .lexicon lexicon object provided by [tidytext::get_sentiments]
 #' @param .format "json" when used in an endpoint or "list" (default) if using
 #'   this function in R
-#' @param .json "condensed" (default) or "pretty"
 #' @param .silent suppresses messages
 #' @return
 #' If `format` is "json":
@@ -38,7 +37,6 @@ process <- function(
   api = NULL,
   .lexicon = NULL,
   .format = "list",
-  .json = "condensed",
   .silent = !getOption("verbose")
 ) {
   if (is.null(page_name)) {
@@ -47,11 +45,7 @@ process <- function(
       message = "need: page_name",
       results = NA
     )
-    if (.format == "json") {
-      return(jsonlite::toJSON(output, pretty = .json == "pretty", auto_unbox = TRUE))
-    } else if (.format == "list") {
-      return(output)
-    }
+    return(output)
   }
   if (!is.null(api)) {
     if (!.silent) {
@@ -155,7 +149,7 @@ process <- function(
     )
   }
   if (.format == "json") {
-    return(jsonlite::toJSON(output, pretty = .json == "pretty", auto_unbox = TRUE))
+    return(output)
   } else if (.format == "list") {
     return(output$results)
   }

@@ -5,8 +5,7 @@
 \title{Complete sentiment analysis pipeline}
 \usage{
 process(page_name = NULL, project = NULL, language = NULL, api = NULL,
-  .lexicon = NULL, .format = "list", .json = "condensed",
-  .silent = !getOption("verbose"))
+  .lexicon = NULL, .format = "list", .silent = !getOption("verbose"))
 }
 \arguments{
 \item{page_name}{the title of the page you want to retrieve}
@@ -23,8 +22,6 @@ if appropriate (e.g. "de" for German)}
 
 \item{.format}{"json" when used in an endpoint or "list" (default) if using
 this function in R}
-
-\item{.json}{"condensed" (default) or "pretty"}
 
 \item{.silent}{suppresses messages}
 }
