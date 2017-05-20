@@ -1,13 +1,53 @@
 ---
 title: "sentimentalk: Sentiment Analysis of Talk Pages as Service"
-output: github_document
+output:
+  github_document:
+    toc: yes
+    toc_depth: 4
+    md_extensions: -autolink_bare_uris
+    includes:
+      in_header: header.md
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, eval=FALSE)
+library(printr) # install.packages("printr")
+set.seed(0)
 ```
 
-[plumber](https://plumber.trestletech.com/)-based API for tidy sentiment analysis[^1] of [MediaWiki talk pages](https://www.mediawiki.org/wiki/Help:Talk_pages) on [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki)-powered websites in R.
+## Usage
+
+### Input
+
+The API endpoint accepts the following parameters:
+
+- **page_name** (starts with "Talk:")
+- **api** is used to specify the URL for the MediaWiki api.php to query
+- **project** and **language**
+    - a Wikimedia **project** such as "wikipedia" or "wikiquote"
+    - a **language** code such as "en" (English) or "de" (German)
+- **format**:
+    - "condensed" (default)
+    - "pretty" makes the output more human-friendly
+
+**Note**: currently, classic (non-Flow) talk pages are unsupported because they are difficult to parse. As a result, if you try to supply a classic talk page, the API will yield an error message.
+
+### Output
+
+If the talk page has been successfully parsed and analyzed, the JSON-formatted output will be:
+
+- `status`: "success" or "error"
+- `message`: helpful message in case of error
+- `results`:
+    - An array of `topics`
+        - For each topic, an array of shuffled `posts`
+          (1st post in output is not necessarily the 1st post within the topic)
+            - For each post, the following fields:
+                - `post`: identifier of the post
+                - `participant`: salted hash of the username (for anonymity)
+                - `total non-stopwords`: number of words within the post that were not [stop words](https://en.wikipedia.org/wiki/Stop_words) such as `r paste0('"', paste0(dplyr::sample_n(tidytext::stop_words, 5)$word, collapse = '", "'), '"')`
+                - `sentiment expression`: proportion of words that express a particular sentiment / total non-stopwords
+                  (may sum up to greater than 1)
 
 ## Setup
 
@@ -22,12 +62,14 @@ To analyze [Talk:Cross-wiki Search Result Improvements on MediaWiki](https://www
 
 ### R
 
-```{r example_r}
+`sentimentalk::process` (used by the endpoint) outputs a tidy tibble by default, which can be used to perform additional analyses in R:
+
+```{r example_r, eval=TRUE}
 sentiment_breakdown <- sentimentalk::process(
   page_name = "Talk:Cross-wiki Search Result Improvements",
   api = "www.mediawiki.org/w/api.php"
 )
-str(sentiment_breakdown)
+head(sentiment_breakdown)
 ```
 
 ### Endpoint
@@ -36,7 +78,7 @@ We start the endpoint for local use via `Rscript endpoint.R`
 
 #### GET
 
-```{bash example_get}
+```bash
 curl -s -G \
   --data-urlencode "page_name=Talk:Cross-wiki Search Result Improvements" \
   --data-urlencode "api=www.mediawiki.org/w/api.php" \
@@ -45,24 +87,36 @@ curl -s -G \
 
 #### POST
 
-```{bash example_post}
+```bash
 curl -s \
   --data-urlencode "page_name=Talk:Cross-wiki Search Result Improvements" \
   --data-urlencode "api=www.mediawiki.org/w/api.php" \
   "http://localhost:8000/analyze"
 ```
 
-#### POST with JSON data
+#### POST with input data as JSON
 
-```{bash example_json}
+```bash
 curl -s \
   --data '{"page_name":"Talk:Cross-wiki Search Result Improvements", "api":"www.mediawiki.org/w/api.php"}' \
   "http://localhost:8000/analyze"
 ```
 
+#### JSON output
+
+**Note**: the output has been truncated.
+
+```{r example_json, eval=TRUE, echo=FALSE, results='asis'}
+sentiment_breakdown <- sentimentalk::process(
+  page_name = "Talk:Cross-wiki Search Result Improvements",
+  api = "www.mediawiki.org/w/api.php",
+  .format = "json", .json = "pretty"
+)
+cat("```json\n")
+cat(paste0(strsplit(sentiment_breakdown, "\n")[[1]][1:43], collapse = "\n"), "\n          ...\n")
+cat("```")
+```
+
 ## Additional Information
 
-The sentiment analysis is performed using the National Research Council Canada (NRC) Word-Emotion Association Lexicon from Saif Mohammad and Peter Turney.[^2]
-
-[^1]: http://tidytextmining.com/sentiment.html
-[^2]: http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm
+The sentiment analysis is performed using the National Research Council Canada (NRC) Word-Emotion Association Lexicon from Saif Mohammad and Peter Turney ([link](http://saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm)).

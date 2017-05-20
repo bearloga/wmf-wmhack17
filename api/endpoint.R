@@ -7,8 +7,12 @@ nrc <- sentiments[sentiments$lexicon == "nrc", c("word", "sentiment")]
 router <- plumber::plumber$new()
 
 endpoint_expression <- expression(
-  function(page_name = NULL, project = NULL, language = NULL, api = NULL) {
-    return(sentimentalk::process(page_name, project, language, api, format = "json", lexicon = nrc))
+  function(page_name = NULL, project = NULL, language = NULL, api = NULL, format = "condensed") {
+    return(sentimentalk::process(
+      page_name, project, language, api,
+      .lexicon = nrc, .json = format,
+      .format = "json", .silent = TRUE
+    ))
   }
 )
 

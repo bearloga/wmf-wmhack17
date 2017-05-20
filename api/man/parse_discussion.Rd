@@ -4,11 +4,22 @@
 \alias{parse_discussion}
 \title{Parse a downloaded talk page}
 \usage{
-parse_discussion(talk_page)
+parse_discussion(talk_page, .silent = !getOption("verbose"))
 }
 \arguments{
 \item{talk_page}{the talk page HTML code downloaded using
 \link[WikipediR:page_content]{WikipediR::page_content}}
+
+\item{.silent}{suppresses messages}
+}
+\value{
+A \code{tbl_df} (slightly fancier \code{data.frame}) with columns:
+\describe{
+\item{topic}{identifier for linking multiple posts together}
+\item{post}{identifier for linking multiple rows (paragraphs) of a post together}
+\item{participant}{hashed name of the user who made the post, see \link{anonymize}}
+\item{text}{a paragraph from the post}
+}
 }
 \description{
 Parses a downloaded talk page into a tidy format with

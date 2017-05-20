@@ -6,3 +6,4 @@
 ^README.Rmd
 ^CONDUCT\.md$
 ^endpoint\.R$
+^header\.md$

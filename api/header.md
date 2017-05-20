@@ -1,0 +1,1 @@
+[plumber](https://plumber.trestletech.com/)-based API for [tidy sentiment analysis](http://tidytextmining.com/sentiment.html) of [MediaWiki talk pages](https://www.mediawiki.org/wiki/Help:Talk_pages) on [MediaWiki](https://www.mediawiki.org/wiki/MediaWiki)-powered websites in R.

@@ -4,12 +4,14 @@
 \alias{analyze}
 \title{Perform a sentiment analysis of a parsed, tidy talk page}
 \usage{
-analyze(tidy_page, lexicon)
+analyze(parsed_talk, lexicon, .silent = !getOption("verbatim"))
 }
 \arguments{
-\item{tidy_page}{the output from \link{parse_discussion}}
-
 \item{lexicon}{lexicon object provided by \link[tidytext:get_sentiments]{tidytext::get_sentiments}}
+
+\item{.silent}{suppresses messages}
+
+\item{tidy_page}{the output from \link{parse_discussion}}
 }
 \description{
 Uses an emotion lexicon to output a breakdown of sentiments

@@ -5,7 +5,8 @@
 \title{Complete sentiment analysis pipeline}
 \usage{
 process(page_name = NULL, project = NULL, language = NULL, api = NULL,
-  format = "list", lexicon = NULL)
+  .lexicon = NULL, .format = "list", .json = "condensed",
+  .silent = !getOption("verbose"))
 }
 \arguments{
 \item{page_name}{the title of the page you want to retrieve}
@@ -18,12 +19,37 @@ if appropriate (e.g. "de" for German)}
 \item{api}{as an alternative to a \code{language} and \code{project} combination
 (e.g. "wiki.mozilla.org/api.php" or "www.gutenberg.org/w/api.php")}
 
-\item{format}{"json" when used in an endpoint or "list" (default) if using
+\item{.lexicon}{lexicon object provided by \link[tidytext:get_sentiments]{tidytext::get_sentiments}}
+
+\item{.format}{"json" when used in an endpoint or "list" (default) if using
 this function in R}
 
-\item{lexicon}{lexicon object provided by \link[tidytext:get_sentiments]{tidytext::get_sentiments}}
+\item{.json}{"condensed" (default) or "pretty"}
+
+\item{.silent}{suppresses messages}
+}
+\value{
+If \code{format} is "json":
+...
+If \code{format} is "list":
+...
 }
 \description{
 Outputs sentiment breakdown of (currently English) comments
 either as a list for use in R or as a JSON string for use as an endpoint.
+}
+\examples{
+\dontrun{
+process(
+  page_name = "Talk:Cross-wiki Search Result Improvements",
+  api = "www.mediawiki.org/w/api.php",
+  .silent = FALSE
+)
+
+# Classic talk pages don't work yet:
+process(
+  page_name = "Talk:Wikimedia_Foundation",
+  project = "wikipedia", language = "en",
+)
+}
 }
