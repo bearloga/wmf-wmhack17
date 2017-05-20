@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 library(plumber)
 
 data("sentiments", package = "tidytext")

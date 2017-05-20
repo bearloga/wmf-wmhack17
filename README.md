@@ -10,14 +10,14 @@ __Status:__ Active
 
 ## Progress
 
-- [ ] API endpoint
+- [ x API endpoint
     - [x] Download talk page
-    - [ ] Parse talk page
+    - [x] Parse talk page
         - [ ] Parse classic talk pages (really hard)
         - [x] Parse [Flow](https://www.mediawiki.org/wiki/Extension:Flow)-enabled talk pages
-    - [ ] Tidy sentiment analysis
-    - [ ] Anonymize and summarize
-    - [ ] Output
+    - [x] Tidy sentiment analysis
+    - [x] Anonymize and summarize
+    - [x] Output
 - [ ] Shiny companion app
     - [ ] User inputs
     - [ ] Show data and behind-the-scenes code
