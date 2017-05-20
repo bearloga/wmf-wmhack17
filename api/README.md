@@ -85,7 +85,7 @@ head(sentiment_breakdown)
 
 ### Endpoint
 
-We start the endpoint for local use via `Rscript endpoint.R`
+We start the endpoint for local use via **endpoint.R** and [pm2](https://plumber.trestletech.com/docs/hosting/)
 
 #### GET
 
@@ -93,7 +93,7 @@ We start the endpoint for local use via `Rscript endpoint.R`
 curl -s -G \
   --data-urlencode "page_name=Talk:Cross-wiki Search Result Improvements" \
   --data-urlencode "api=www.mediawiki.org/w/api.php" \
-  "http://localhost:8000/analyze"
+  "https://sentimentalk.wmflabs.org/analyze"
 ```
 
 #### POST
@@ -102,7 +102,7 @@ curl -s -G \
 curl -s \
   --data-urlencode "page_name=Talk:Cross-wiki Search Result Improvements" \
   --data-urlencode "api=www.mediawiki.org/w/api.php" \
-  "http://localhost:8000/analyze"
+  "https://sentimentalk.wmflabs.org/analyze"
 ```
 
 #### POST with input data as JSON
@@ -110,7 +110,7 @@ curl -s \
 ``` bash
 curl -s \
   --data '{"page_name":"Talk:Cross-wiki Search Result Improvements", "api":"www.mediawiki.org/w/api.php"}' \
-  "http://localhost:8000/analyze"
+  "https://sentimentalk.wmflabs.org/analyze"
 ```
 
 #### JSON output
