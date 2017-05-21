@@ -8,14 +8,9 @@
 #' @param api as an alternative to a `language` and `project` combination
 #'   (e.g. "wiki.mozilla.org/api.php" or "www.gutenberg.org/w/api.php")
 #' @param .lexicon lexicon object provided by [tidytext::get_sentiments]
-#' @param .format "json" when used in an endpoint or "list" (default) if using
+#' @param .format "list" when used in an endpoint or "df" (default) if using
 #'   this function in R
 #' @param .silent suppresses messages
-#' @return
-#' If `format` is "json":
-#' ...
-#' If `format` is "list":
-#' ...
 #' @examples \dontrun{
 #' process(
 #'   page_name = "Talk:Cross-wiki Search Result Improvements",
@@ -36,7 +31,7 @@ process <- function(
   language = NULL,
   api = NULL,
   .lexicon = NULL,
-  .format = "list",
+  .format = "df",
   .silent = !getOption("verbose")
 ) {
   if (is.null(page_name)) {
@@ -110,7 +105,7 @@ process <- function(
       if (!.silent) {
         message("received analyzed sentiment data")
       }
-      if (.format == "json") {
+      if (.format == "list") {
         if (!.silent) {
           message("performing additional data wrangling for optimal JSON output")
         }
@@ -148,9 +143,9 @@ process <- function(
       results = NA
     )
   }
-  if (.format == "json") {
+  if (.format == "list") {
     return(output)
-  } else if (.format == "list") {
+  } else if (.format == "df") {
     return(output$results)
   }
 }

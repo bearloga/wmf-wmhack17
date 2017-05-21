@@ -12,7 +12,7 @@ endpoint_expression <- expression(
   function(page_name = NULL, project = NULL, language = NULL, api = NULL) {
     return(sentimentalk::process(
       page_name, project, language, api,
-      .lexicon = nrc, .format = "json",
+      .lexicon = nrc, .format = "list",
       .silent = TRUE
     ))
   }

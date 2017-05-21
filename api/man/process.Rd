@@ -5,7 +5,7 @@
 \title{Complete sentiment analysis pipeline}
 \usage{
 process(page_name = NULL, project = NULL, language = NULL, api = NULL,
-  .lexicon = NULL, .format = "list", .silent = !getOption("verbose"))
+  .lexicon = NULL, .format = "df", .silent = !getOption("verbose"))
 }
 \arguments{
 \item{page_name}{the title of the page you want to retrieve}
@@ -20,16 +20,10 @@ if appropriate (e.g. "de" for German)}
 
 \item{.lexicon}{lexicon object provided by \link[tidytext:get_sentiments]{tidytext::get_sentiments}}
 
-\item{.format}{"json" when used in an endpoint or "list" (default) if using
+\item{.format}{"list" when used in an endpoint or "df" (default) if using
 this function in R}
 
 \item{.silent}{suppresses messages}
-}
-\value{
-If \code{format} is "json":
-...
-If \code{format} is "list":
-...
 }
 \description{
 Outputs sentiment breakdown of (currently English) comments

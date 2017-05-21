@@ -18,12 +18,12 @@ __Status:__ Active
     - [x] Tidy sentiment analysis
     - [x] Anonymize and summarize
     - [x] Output
-- [ ] Shiny companion app
-    - [ ] User inputs
-    - [ ] Show data and behind-the-scenes code
-        - [ ] Show API call
+- [x] Shiny companion app
+    - [x] User inputs
+    - [x] Show data and behind-the-scenes code
+        - [x] Show API call
         - [ ] Show JSON output
-    - [ ] Data visualization
+    - [x] Data visualization
 
 ## Additional Information
 
