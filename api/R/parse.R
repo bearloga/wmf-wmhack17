@@ -12,7 +12,7 @@
 #'   \item{text}{a paragraph from the post}
 #' }
 #' @export
-parse_discussion <- function(talk_page, .silent = !getOption("verbose")) {
+parse_discussion <- function(talk_page, .silent = TRUE) {
   if (!.silent) {
     message("reading fetched talk page's HTML")
   }

@@ -4,7 +4,7 @@
 \alias{parse_discussion}
 \title{Parse a downloaded talk page}
 \usage{
-parse_discussion(talk_page, .silent = !getOption("verbose"))
+parse_discussion(talk_page, .silent = TRUE)
 }
 \arguments{
 \item{talk_page}{the talk page HTML code downloaded using

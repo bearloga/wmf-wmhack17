@@ -32,7 +32,7 @@ process <- function(
   api = NULL,
   .lexicon = NULL,
   .format = "df",
-  .silent = !getOption("verbose")
+  .silent = TRUE
 ) {
   msg <- ""
   if (is.null(page_name)) {
@@ -56,7 +56,7 @@ process <- function(
     }, error = function(e) {
       msg <<- as.character(e)
     }, finally = {
-      result <<- NULL
+      result <<- data.frame()
     })
   } else if (!is.null(project) && !is.null(language)) {
     if (!.silent) {
@@ -72,17 +72,17 @@ process <- function(
     }, error = function(e) {
       msg <<- as.character(e)
     }, finally = {
-      result <<- NULL
+      result <<- data.frame()
     })
   } else {
-    result <- NULL
+    result <- data.frame()
     msg <- "need: 'api' (e.g. 'www.mediawiki.org/w/api.php') or 'project' (e.g. 'wikiquote') & 'language' code (e.g. 'de' for German)"
   }
   if (!is.null(result)) {
     output <- list(
       status = "success",
       message = "successfully retrieved",
-      results = NA
+      results = data.frame()
     )
     if (is.null(.lexicon)) {
       if (!.silent) {
@@ -110,7 +110,7 @@ process <- function(
         if (!.silent) {
           message("performing additional data wrangling for optimal JSON output")
         }
-        output$results <<- sentiment_breakdown %>%
+        output$results <- sentiment_breakdown %>%
           dplyr::group_by(topic, post, participant) %>%
           tidyr::nest(.key = "sentiments") %>%
           dplyr::mutate(
@@ -125,7 +125,7 @@ process <- function(
         if (!.silent) {
           message("returning a nice and tidy dataset")
         }
-        output$results <<- sentiment_breakdown %>%
+        output$results <- sentiment_breakdown %>%
           dplyr::select(
             topic, post, participant, sentiment,
             `total non-stopwords` = total_non_stop_words,
@@ -141,7 +141,7 @@ process <- function(
     output <- list(
       status = "error",
       message = msg,
-      results = NA
+      results = data.frame()
     )
   }
   if (.format == "list") {

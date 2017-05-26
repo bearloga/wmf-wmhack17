@@ -5,7 +5,7 @@
 #' @param lexicon lexicon object provided by [tidytext::get_sentiments]
 #' @param .silent suppresses messages
 #' @export
-analyze <- function(parsed_talk, lexicon, .silent = !getOption("verbatim")) {
+analyze <- function(parsed_talk, lexicon, .silent = TRUE) {
   if (!.silent) {
     message("tokenizing and counting words (for repetitions)")
   }

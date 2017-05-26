@@ -50,6 +50,7 @@ shinyServer(function(input, output, session) {
       msg("...downloading and parsing talk page...")
       isolate({
         page_name(input$page_name)
+        results <- NULL
         tryCatch({
           if (input$source == "proj" && input$project == "mediawiki") {
             results <- sentimentalk::process(
@@ -82,72 +83,77 @@ shinyServer(function(input, output, session) {
   })
 
   output$breakdown_overall <- renderPlot({
-    sentiment_breakdown() %>%
-      dplyr::filter(sentiment != "none/other") %>%
-      dplyr::group_by(sentiment) %>%
-      dplyr::summarize(
-        `relative expression` = round(sum(`instances of expression`)/sum(`total non-stopwords`), 4)
-      ) %>%
-      ggplot(aes(x = sentiment, y = `relative expression`)) +
-      geom_bar(stat = "identity") +
-      scale_y_continuous(labels = scales::percent_format()) +
-      ggtitle("Overall relative sentiment expression",
-              subtitle = page_name()) +
-      theme_minimal(base_size = 14)
+    sentiment_data <- sentiment_breakdown()
+    isolate({
+      sentiment_data %>%
+        dplyr::filter(sentiment != "none/other") %>%
+        dplyr::group_by(sentiment) %>%
+        dplyr::summarize(
+          `relative expression` = round(sum(`instances of expression`)/sum(`total non-stopwords`), 4)
+        ) %>%
+        ggplot(aes(x = sentiment, y = `relative expression`)) +
+        geom_bar(stat = "identity") +
+        scale_y_continuous(labels = scales::percent_format()) +
+        ggtitle("Overall relative sentiment expression",
+                subtitle = page_name()) +
+        theme_minimal(base_size = 14)
+    })
   })
 
   output$topics_container <- renderUI({
-    topics <- unique(sentiment_breakdown()$topic)
-    selectInput("topic", "Topic", choices = topics)
+    selectInput("topic", "Topic", choices = unique(sentiment_breakdown()$topic))
   })
 
   output$participants_container <- renderUI({
-    participants <- unique(sentiment_breakdown()$participant)
-    selectInput("participant", "Participant", choices = participants)
+    selectInput("participant", "Participant", choices = unique(sentiment_breakdown()$participant))
   })
 
   output$breakdown_topic <- renderPlot({
     topic <- dplyr::filter(sentiment_breakdown(), topic == input$topic)
-    total_posts <- max(topic$post)
-    total_words <- sum(topic$`total non-stopwords`)
-    total_participants <- length(unique(topic$participant))
-    if (!input$topics_include) {
-      topic <- dplyr::filter(topic, sentiment != "none/other")
-    }
-    relative_expression <- topic %>%
-      dplyr::group_by(sentiment) %>%
-      dplyr::summarize(
-        `relative expression` = round(sum(`instances of expression`)/sum(`total non-stopwords`), 4)
-      )
-    ggplot(relative_expression, aes(x = sentiment, y = `relative expression`)) +
-      geom_bar(stat = "identity") +
-      scale_y_continuous(labels = scales::percent_format()) +
-      ggtitle("Sentiment expression within topic",
-              subtitle = sprintf("%.0f word(s) across %.0f post(s) by %.0f participant(s)",
-                                 total_words, total_posts, total_participants)) +
-      theme_minimal(base_size = 14)
+    isolate({
+      total_posts <- max(topic$post)
+      total_words <- sum(topic$`total non-stopwords`)
+      total_participants <- length(unique(topic$participant))
+      if (!input$topics_include) {
+        topic <- dplyr::filter(topic, sentiment != "none/other")
+      }
+      relative_expression <- topic %>%
+        dplyr::group_by(sentiment) %>%
+        dplyr::summarize(
+          `relative expression` = round(sum(`instances of expression`)/sum(`total non-stopwords`), 4)
+        )
+      ggplot(relative_expression, aes(x = sentiment, y = `relative expression`)) +
+        geom_bar(stat = "identity") +
+        scale_y_continuous(labels = scales::percent_format()) +
+        ggtitle("Sentiment expression within topic",
+                subtitle = sprintf("%.0f word(s) across %.0f post(s) by %.0f participant(s)",
+                                   total_words, total_posts, total_participants)) +
+        theme_minimal(base_size = 14)
+    })
   })
 
   output$breakdown_participant <- renderPlot({
     participant <- dplyr::filter(sentiment_breakdown(), participant == input$participant)
-    total_posts <- max(participant$post)
-    total_words <- sum(participant$`total non-stopwords`)
-    total_topics <- length(unique(participant$topic))
-    if (!input$participants_include) {
-      participant <- dplyr::filter(participant, sentiment != "none/other")
-    }
-    relative_expression <- participant %>%
-      dplyr::group_by(sentiment) %>%
-      dplyr::summarize(
-        `relative expression` = round(sum(`instances of expression`)/sum(`total non-stopwords`), 4)
-      )
-    ggplot(relative_expression, aes(x = sentiment, y = `relative expression`)) +
-      geom_bar(stat = "identity") +
-      scale_y_continuous(labels = scales::percent_format()) +
-      ggtitle("Sentiment expression by participant",
-              subtitle = sprintf("%.0f word(s) across %.0f post(s) and %.0f topic(s)",
-                                 total_words, total_posts, total_topics)) +
-      theme_minimal(base_size = 14)
+    isolate({
+      total_posts <- max(participant$post)
+      total_words <- sum(participant$`total non-stopwords`)
+      total_topics <- length(unique(participant$topic))
+      if (!input$participants_include) {
+        participant <- dplyr::filter(participant, sentiment != "none/other")
+      }
+      relative_expression <- participant %>%
+        dplyr::group_by(sentiment) %>%
+        dplyr::summarize(
+          `relative expression` = round(sum(`instances of expression`)/sum(`total non-stopwords`), 4)
+        )
+      ggplot(relative_expression, aes(x = sentiment, y = `relative expression`)) +
+        geom_bar(stat = "identity") +
+        scale_y_continuous(labels = scales::percent_format()) +
+        ggtitle("Sentiment expression by participant",
+                subtitle = sprintf("%.0f word(s) across %.0f post(s) and %.0f topic(s)",
+                                   total_words, total_posts, total_topics)) +
+        theme_minimal(base_size = 14)
+    })
   })
 
   output$api_call <- renderUI({

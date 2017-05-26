@@ -5,7 +5,7 @@
 \title{Complete sentiment analysis pipeline}
 \usage{
 process(page_name = NULL, project = NULL, language = NULL, api = NULL,
-  .lexicon = NULL, .format = "df", .silent = !getOption("verbose"))
+  .lexicon = NULL, .format = "df", .silent = TRUE)
 }
 \arguments{
 \item{page_name}{the title of the page you want to retrieve}

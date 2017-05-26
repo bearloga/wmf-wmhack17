@@ -4,7 +4,7 @@
 \alias{analyze}
 \title{Perform a sentiment analysis of a parsed, tidy talk page}
 \usage{
-analyze(parsed_talk, lexicon, .silent = !getOption("verbatim"))
+analyze(parsed_talk, lexicon, .silent = TRUE)
 }
 \arguments{
 \item{lexicon}{lexicon object provided by \link[tidytext:get_sentiments]{tidytext::get_sentiments}}
