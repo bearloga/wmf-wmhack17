@@ -22,48 +22,53 @@ parse_discussion <- function(talk_page, .silent = !getOption("verbose")) {
       message("parsing Flow-enabled talk page")
     }
     # Flow-enabled talk page
-    topics <- xml2::xml_find_all(talk_page, "//div[contains(@class, 'flow-topic flow-load-interactive')]")
-    topic_titles <- xml2::xml_find_all(topics, ".//h2[starts-with(@class, 'flow-topic-title')]") %>%
-      xml2::xml_text(trim = TRUE)
-    if (!.silent) {
-      message("extracting author names and post content from topics, one by one")
+    # Check if empty:
+    if (length(xml2::xml_find_all(talk_page, "//div[@class = 'flow-post']")) == 0) {
+      stop("no posts to parse")
+    } else {
+      topics <- xml2::xml_find_all(talk_page, "//div[contains(@class, 'flow-topic flow-load-interactive')]")
+      topic_titles <- xml2::xml_find_all(topics, ".//h2[starts-with(@class, 'flow-topic-title')]") %>%
+        xml2::xml_text(trim = TRUE)
+      if (!.silent) {
+        message("extracting author names and post content from topics, one by one")
+      }
+      output <- topics %>%
+        lapply(xml2::xml_find_all, xpath = ".//div[@class = 'flow-post']") %>%
+        { names(.) <- topic_titles; . } %>%
+        lapply(function(topic) {
+          posts <- topic %>%
+            xml2::xml_find_all(".//div[contains(@class, 'flow-post-main')]")
+          post_content <- xml2::xml_find_all(posts, ".//div[contains(@class, 'flow-post-content')]") %>%
+            lapply(xml2::xml_find_all, xpath = ".//*[self::p or self::ol or self::ul]") %>%
+            lapply(xml2::xml_text, trim = TRUE) %>%
+            lapply(dplyr::as_data_frame) %>%
+            lapply(dplyr::rename_, .dots = list("text" = "value"))
+          authors <- xml2::xml_find_all(posts, ".//span[contains(@class, 'flow-author')]") %>%
+            xml2::xml_find_all(xpath = ".//a/bdi") %>%
+            xml2::xml_text(trim = TRUE) %>%
+            lapply(function(author) {
+              return(dplyr::data_frame(author = author))
+            })
+          return(
+            dplyr::left_join(
+              dplyr::bind_rows(post_content, .id = "post"),
+              dplyr::bind_rows(authors, .id = "post"),
+              by = "post"
+            ) %>%
+              # Shuffling the order of the posts so it's more difficult to
+              # connect individuals to their posts' sentiment breakdown:
+              dplyr::mutate(
+                post = as.numeric(post),
+                post = order(runif(max(post)))[post]
+              ) %>%
+              dplyr::arrange(post)
+          )
+        }) %>%
+        dplyr::bind_rows(.id = "topic") %>%
+        dplyr::mutate(author = anonymize(author)) %>%
+        dplyr::select(topic, post, participant = author, text)
+      return(output)
     }
-    output <- topics %>%
-      lapply(xml2::xml_find_all, xpath = ".//div[@class = 'flow-post']") %>%
-      { names(.) <- topic_titles; . } %>%
-      lapply(function(topic) {
-        posts <- topic %>%
-          xml2::xml_find_all(".//div[contains(@class, 'flow-post-main')]")
-        post_content <- xml2::xml_find_all(posts, ".//div[contains(@class, 'flow-post-content')]") %>%
-          lapply(xml2::xml_find_all, xpath = ".//*[self::p or self::ol or self::ul]") %>%
-          lapply(xml2::xml_text, trim = TRUE) %>%
-          lapply(dplyr::as_data_frame) %>%
-          lapply(dplyr::rename_, .dots = list("text" = "value"))
-        authors <- xml2::xml_find_all(posts, ".//span[contains(@class, 'flow-author')]") %>%
-          xml2::xml_find_all(xpath = ".//a/bdi") %>%
-          xml2::xml_text(trim = TRUE) %>%
-          lapply(function(author) {
-            return(dplyr::data_frame(author = author))
-          })
-        return(
-          dplyr::left_join(
-            dplyr::bind_rows(post_content, .id = "post"),
-            dplyr::bind_rows(authors, .id = "post"),
-            by = "post"
-          ) %>%
-          # Shuffling the order of the posts so it's more difficult to
-          # connect individuals to their posts' sentiment breakdown:
-          dplyr::mutate(
-            post = as.numeric(post),
-            post = order(runif(max(post)))[post]
-          ) %>%
-          dplyr::arrange(post)
-        )
-      }) %>%
-      dplyr::bind_rows(.id = "topic") %>%
-      dplyr::mutate(author = anonymize(author)) %>%
-      dplyr::select(topic, post, participant = author, text)
-    return(output)
   } else if (length(xml2::xml_find_all(talk_page, "//div[@class = 'flow-board']")) == 0) {
     # classic talk page
     if (!.silent) {

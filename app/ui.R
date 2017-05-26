@@ -1,12 +1,14 @@
 library(shiny)
+library(shinyjs)
 
 shinyUI(fluidPage(
+  useShinyjs(),  # Include shinyjs
   titlePanel("Sentiment Analysis of Talk Pages"),
   sidebarLayout(
     sidebarPanel(
       textInput("page_name", "Page Name",
                 placeholder = "Talk:Cross-wiki Search Result Improvements"),
-      helpText("Page must use Flow, parser does not support classic talk pages"),
+      helpText("Page must use Flow, parser does not support classic talk pages."),
       radioButtons("source", "Source", selected = "api",
                    choices = c("API" = "api", "Project & Language" = "proj")),
       conditionalPanel("input.source == 'api'",
@@ -14,18 +16,22 @@ shinyUI(fluidPage(
                                  placeholder = "www.mediawiki.org/w/api.php")),
       conditionalPanel("input.source == 'proj'",
                        selectInput("project", "Project",
-                                   choices = c("Wikipedia" = "wikipedia")),
+                                   choices = c("MediaWiki" = "mediawiki")),
                        selectInput("language", "Language Code",
-                                   choices = c("English" = "en"))),
-      actionButton("demo_btn", "Demo", icon = icon("eye")),
-      actionButton("analyze_btn", "Analyze", icon = icon("refresh")),
+                                   choices = c("None" = "-"))),
+      fluidRow(
+        column(actionButton("demo_btn", "Demo", icon = icon("eye")), align = "center", width = 6),
+        column(actionButton("random_btn", "Random", icon = icon("random")), align = "center", width = 6)
+      ),
       br(),
-      textOutput("n_topics")
+      div(actionButton("analyze_btn", "Analyze Talk Page", icon = icon("refresh")), style = "text-align: center;"),
+      br(),
+      div(textOutput("message"), style = "text-align: center;")
     ),
     mainPanel(
       tabsetPanel(
         tabPanel("Overall Sentiment",
-                 plotly::plotlyOutput("breakdown_overall"), icon = icon("bar-chart")),
+                 plotOutput("breakdown_overall"), icon = icon("bar-chart")),
         tabPanel("Sentiment by Topic",
                  br(),
                  fluidRow(
@@ -33,7 +39,7 @@ shinyUI(fluidPage(
                    column(checkboxInput("topics_include", "Include \"none/other\"", TRUE), width = 4)
                  ),
                  br(),
-                 plotly::plotlyOutput("breakdown_topic")),
+                 plotOutput("breakdown_topic")),
         tabPanel("Sentiment by Participant",
                  br(),
                  fluidRow(
@@ -41,7 +47,7 @@ shinyUI(fluidPage(
                    column(checkboxInput("participants_include", "Include \"none/other\"", TRUE), width = 4)
                  ),
                  br(),
-                 plotly::plotlyOutput("breakdown_participant")),
+                 plotOutput("breakdown_participant")),
         tabPanel("API Endpoint Usage",
                  br(),
                  p("You can access the raw output using the API endpoint:"),

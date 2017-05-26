@@ -1,27 +1,61 @@
 library(magrittr)
 library(shiny)
+library(shinyjs)
 library(ggplot2)
-library(plotly)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
+  msg <- reactiveVal()
   page_name <- reactiveVal()
   sentiment_breakdown <- reactiveVal()
 
   observe({
     if (input$demo_btn > 0) {
-      updateTextInput(session, "page_name", value = "Talk:Cross-wiki Search Result Improvements")
-      updateRadioButtons(session, "source", selected = "api")
+      if (rbinom(1, 1, 0.5) == 0) {
+        updateTextInput(session, "page_name", value = "Talk:Cross-wiki Search Result Improvements")
+      } else {
+        updateTextInput(session, "page_name", value = "Talk:Wikipedia.org Portal A/B testing")
+      }
+      updateRadioButtons(session, "source", selected = "proj")
+      updateTextInput(session, "project", value = "mediawiki")
       updateTextInput(session, "api", value = "www.mediawiki.org/w/api.php")
+      runjs('$("button#analyze_btn").trigger("click")')
+    }
+  })
+
+  observe({
+    if (input$random_btn > 0) {
+      updateRadioButtons(session, "source", selected = "proj")
+      updateTextInput(session, "project", value = "mediawiki")
+      updateTextInput(session, "api", value = "www.mediawiki.org/w/api.php")
+      msg("...checking random page for Flow...")
+      isolate({
+        flow_disabled <- TRUE
+        while (flow_disabled) {
+          random_page <- WikipediR::random_page(domain = "www.mediawiki.org/w/api.php", namespaces = 1, as_wikitext = TRUE)[[1]]
+          if (grepl('^\\{"flow-workflow"\\:', random_page$wikitext$`*`)) {
+            flow_disabled <- FALSE
+          }
+        }
+        msg("found a valid random page")
+        updateTextInput(session, "page_name", value = random_page$title)
+        runjs('$("button#analyze_btn").trigger("click")')
+      })
     }
   })
 
   observe({
     if (input$analyze_btn > 0) {
+      msg("...downloading and parsing talk page...")
       isolate({
         page_name(input$page_name)
-        if (input$source == "api") {
+        if (input$source == "proj" && input$project == "mediawiki") {
+          results <- sentimentalk::process(
+            page_name = input$page_name,
+            api = "www.mediawiki.org/w/api.php"
+          )
+        } else if (input$source == "api") {
           results <- sentimentalk::process(
             page_name = input$page_name,
             api = input$api
@@ -34,20 +68,17 @@ shinyServer(function(input, output, session) {
           )
         }
         sentiment_breakdown(results)
+        msg(sprintf("%.0f topics parsed", length(unique(results$topic))))
       })
     }
   })
 
-  output$n_topics <- renderText({
-    if (input$analyze_btn > 0) {
-      sprintf("%.0f topics parsed", length(unique(sentiment_breakdown()$topic)))
-    } else {
-      "press Demo and Analyze"
-    }
+  output$message <- renderText({
+    msg()
   })
 
-  output$breakdown_overall <- renderPlotly({
-    g <- sentiment_breakdown() %>%
+  output$breakdown_overall <- renderPlot({
+    sentiment_breakdown() %>%
       dplyr::filter(sentiment != "none/other") %>%
       dplyr::group_by(sentiment) %>%
       dplyr::summarize(
@@ -57,8 +88,8 @@ shinyServer(function(input, output, session) {
       geom_bar(stat = "identity") +
       scale_y_continuous(labels = scales::percent_format()) +
       ggtitle("Overall relative sentiment expression",
-              subtitle = page_name())
-    ggplotly(g)
+              subtitle = page_name()) +
+      theme_minimal(base_size = 14)
   })
 
   output$topics_container <- renderUI({
@@ -71,7 +102,7 @@ shinyServer(function(input, output, session) {
     selectInput("participant", "Participant", choices = participants)
   })
 
-  output$breakdown_topic <- renderPlotly({
+  output$breakdown_topic <- renderPlot({
     topic <- dplyr::filter(sentiment_breakdown(), topic == input$topic)
     total_posts <- max(topic$post)
     total_words <- sum(topic$`total non-stopwords`)
@@ -84,16 +115,16 @@ shinyServer(function(input, output, session) {
       dplyr::summarize(
         `relative expression` = round(sum(`instances of expression`)/sum(`total non-stopwords`), 4)
       )
-    g <- ggplot(relative_expression, aes(x = sentiment, y = `relative expression`)) +
+    ggplot(relative_expression, aes(x = sentiment, y = `relative expression`)) +
       geom_bar(stat = "identity") +
       scale_y_continuous(labels = scales::percent_format()) +
       ggtitle("Sentiment expression within topic",
               subtitle = sprintf("%.0f word(s) across %.0f post(s) by %.0f participant(s)",
-                                 total_words, total_posts, total_participants))
-    ggplotly(g)
+                                 total_words, total_posts, total_participants)) +
+      theme_minimal(base_size = 14)
   })
 
-  output$breakdown_participant <- renderPlotly({
+  output$breakdown_participant <- renderPlot({
     participant <- dplyr::filter(sentiment_breakdown(), participant == input$participant)
     total_posts <- max(participant$post)
     total_words <- sum(participant$`total non-stopwords`)
@@ -106,13 +137,13 @@ shinyServer(function(input, output, session) {
       dplyr::summarize(
         `relative expression` = round(sum(`instances of expression`)/sum(`total non-stopwords`), 4)
       )
-    g <- ggplot(relative_expression, aes(x = sentiment, y = `relative expression`)) +
+    ggplot(relative_expression, aes(x = sentiment, y = `relative expression`)) +
       geom_bar(stat = "identity") +
       scale_y_continuous(labels = scales::percent_format()) +
       ggtitle("Sentiment expression by participant",
               subtitle = sprintf("%.0f word(s) across %.0f post(s) and %.0f topic(s)",
-                                 total_words, total_posts, total_topics))
-    ggplotly(g)
+                                 total_words, total_posts, total_topics)) +
+      theme_minimal(base_size = 14)
   })
 
   output$api_call <- renderUI({
