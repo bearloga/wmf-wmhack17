@@ -10,7 +10,7 @@ __Status:__ Active
 
 ## Progress
 
-- [ x API endpoint
+- [x] API endpoint
     - [x] Download talk page
     - [x] Parse talk page
         - [ ] Parse classic talk pages (really hard)
