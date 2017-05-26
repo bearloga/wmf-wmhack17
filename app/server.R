@@ -3,6 +3,16 @@ library(shiny)
 library(shinyjs)
 library(ggplot2)
 
+demo_pages <- c(
+  "Talk:Cross-wiki Search Result Improvements",
+  "Talk:Wikipedia.org Portal A/B testing",
+  "Talk:TextCat",
+  "Talk:Flow",
+  "Talk:VisualEditor",
+  "Talk:Wikimedia Product",
+  "Talk:Beta Features"
+)
+
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
@@ -12,11 +22,7 @@ shinyServer(function(input, output, session) {
 
   observe({
     if (input$demo_btn > 0) {
-      if (rbinom(1, 1, 0.5) == 0) {
-        updateTextInput(session, "page_name", value = "Talk:Cross-wiki Search Result Improvements")
-      } else {
-        updateTextInput(session, "page_name", value = "Talk:Wikipedia.org Portal A/B testing")
-      }
+      updateTextInput(session, "page_name", value = demo_pages[rbinom(1, length(demo_pages) - 1, 0.5) + 1])
       updateRadioButtons(session, "source", selected = "proj")
       updateTextInput(session, "project", value = "mediawiki")
       updateTextInput(session, "api", value = "www.mediawiki.org/w/api.php")
@@ -110,13 +116,13 @@ shinyServer(function(input, output, session) {
 
   output$breakdown_topic <- renderPlot({
     topic <- dplyr::filter(sentiment_breakdown(), topic == input$topic)
+    total_posts <- max(topic$post)
+    total_words <- sum(topic$`total non-stopwords`)
+    total_participants <- length(unique(topic$participant))
+    if (!input$topics_include) {
+      topic <- dplyr::filter(topic, sentiment != "none/other")
+    }
     isolate({
-      total_posts <- max(topic$post)
-      total_words <- sum(topic$`total non-stopwords`)
-      total_participants <- length(unique(topic$participant))
-      if (!input$topics_include) {
-        topic <- dplyr::filter(topic, sentiment != "none/other")
-      }
       relative_expression <- topic %>%
         dplyr::group_by(sentiment) %>%
         dplyr::summarize(
@@ -134,13 +140,13 @@ shinyServer(function(input, output, session) {
 
   output$breakdown_participant <- renderPlot({
     participant <- dplyr::filter(sentiment_breakdown(), participant == input$participant)
+    total_posts <- max(participant$post)
+    total_words <- sum(participant$`total non-stopwords`)
+    total_topics <- length(unique(participant$topic))
+    if (!input$participants_include) {
+      participant <- dplyr::filter(participant, sentiment != "none/other")
+    }
     isolate({
-      total_posts <- max(participant$post)
-      total_words <- sum(participant$`total non-stopwords`)
-      total_topics <- length(unique(participant$topic))
-      if (!input$participants_include) {
-        participant <- dplyr::filter(participant, sentiment != "none/other")
-      }
       relative_expression <- participant %>%
         dplyr::group_by(sentiment) %>%
         dplyr::summarize(
