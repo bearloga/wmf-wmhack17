@@ -71,8 +71,7 @@ function(request) {
                      a("GitHub/bearloga/wmf-wmhack17/api", href = "https://github.com/bearloga/wmf-wmhack17/tree/master/api"),
                      "for more details."),
                    actionButton("use_api", "Make API call and show JSON output"),
-                   br(),
-                   verbatimTextOutput("api_output"),
+                   div(verbatimTextOutput("api_output"), style = "margin-top: 10px; height: 300px; overflow:scroll;"),
                    icon = icon("gears"))
         )
       )

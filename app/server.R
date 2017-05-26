@@ -174,7 +174,7 @@ shinyServer(function(input, output, session) {
         )
         tryCatch({
           httr::stop_for_status(result)
-          endpoint_output(jsonlite::prettify(httr::content(result, as = "text")))
+          endpoint_output(jsonlite::prettify(httr::content(result, as = "text", encoding = "UTF-8")))
         },
         error = function(e) {
           msg(as.character(e))
