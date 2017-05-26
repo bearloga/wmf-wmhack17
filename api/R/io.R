@@ -34,6 +34,7 @@ process <- function(
   .format = "df",
   .silent = !getOption("verbose")
 ) {
+  msg <- ""
   if (is.null(page_name)) {
     output <- list(
       status = "error",
@@ -53,7 +54,7 @@ process <- function(
         as_wikitext = FALSE
       )$parse$text$`*`
     }, error = function(e) {
-      msg <<- e
+      msg <<- as.character(e)
     }, finally = {
       result <<- NULL
     })
@@ -69,7 +70,7 @@ process <- function(
         as_wikitext = FALSE
       )$parse$text$`*`
     }, error = function(e) {
-      msg <<- e
+      msg <<- as.character(e)
     }, finally = {
       result <<- NULL
     })
@@ -109,7 +110,7 @@ process <- function(
         if (!.silent) {
           message("performing additional data wrangling for optimal JSON output")
         }
-        output$results <- sentiment_breakdown %>%
+        output$results <<- sentiment_breakdown %>%
           dplyr::group_by(topic, post, participant) %>%
           tidyr::nest(.key = "sentiments") %>%
           dplyr::mutate(
@@ -124,7 +125,7 @@ process <- function(
         if (!.silent) {
           message("returning a nice and tidy dataset")
         }
-        output$results <- sentiment_breakdown %>%
+        output$results <<- sentiment_breakdown %>%
           dplyr::select(
             topic, post, participant, sentiment,
             `total non-stopwords` = total_non_stop_words,
@@ -134,7 +135,7 @@ process <- function(
     }, error = function(e) {
       message("encountered an issue")
       output$status <<- "error"
-      output$message <<- print(e)
+      output$message <<- as.character(e)
     })
   } else {
     output <- list(

@@ -50,25 +50,29 @@ shinyServer(function(input, output, session) {
       msg("...downloading and parsing talk page...")
       isolate({
         page_name(input$page_name)
-        if (input$source == "proj" && input$project == "mediawiki") {
-          results <- sentimentalk::process(
-            page_name = input$page_name,
-            api = "www.mediawiki.org/w/api.php"
-          )
-        } else if (input$source == "api") {
-          results <- sentimentalk::process(
-            page_name = input$page_name,
-            api = input$api
-          )
-        } else {
-          results <- sentimentalk::process(
-            page_name = input$page_name,
-            project = input$project,
-            language = input$language
-          )
-        }
-        sentiment_breakdown(results)
-        msg(sprintf("%.0f topics parsed", length(unique(results$topic))))
+        tryCatch({
+          if (input$source == "proj" && input$project == "mediawiki") {
+            results <- sentimentalk::process(
+              page_name = input$page_name,
+              api = "www.mediawiki.org/w/api.php"
+            )
+          } else if (input$source == "api") {
+            results <- sentimentalk::process(
+              page_name = input$page_name,
+              api = input$api
+            )
+          } else {
+            results <- sentimentalk::process(
+              page_name = input$page_name,
+              project = input$project,
+              language = input$language
+            )
+          }
+          sentiment_breakdown(results)
+          msg(sprintf("%.0f topics parsed", length(unique(results$topic))))
+        }, error = function(e) {
+          msg("encountered an issue")
+        })
       })
     }
   })

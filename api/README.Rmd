@@ -53,7 +53,7 @@ If the talk page has been successfully parsed and analyzed, the JSON-formatted o
 
 ```R
 # install.packages("devtools")
-devtools::install_github("bearloga/wmf-wmhack17/sentimentalk")
+devtools::install_github("bearloga/wmf-wmhack17/api")
 ```
 
 ## Example
