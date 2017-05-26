@@ -3,31 +3,21 @@ library(shiny)
 library(shinyjs)
 library(ggplot2)
 
-demo_pages <- c(
-  "Talk:Cross-wiki Search Result Improvements",
-  "Talk:Wikipedia.org Portal A/B testing",
-  "Talk:TextCat",
-  "Talk:Flow",
-  "Talk:VisualEditor",
-  "Talk:Wikimedia Product",
-  "Talk:Beta Features"
-)
-
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
+
+  setBookmarkExclude(c("demo", "topics_include", "participants_include"))
 
   msg <- reactiveVal()
   page_name <- reactiveVal()
   sentiment_breakdown <- reactiveVal()
+  endpoint_output <- reactiveVal()
 
   observe({
-    if (input$demo_btn > 0) {
-      updateTextInput(session, "page_name", value = demo_pages[rbinom(1, length(demo_pages) - 1, 0.5) + 1])
-      updateRadioButtons(session, "source", selected = "proj")
-      updateTextInput(session, "project", value = "mediawiki")
-      updateTextInput(session, "api", value = "www.mediawiki.org/w/api.php")
-      runjs('$("button#analyze_btn").trigger("click")')
-    }
+    updateTextInput(session, "page_name", value = input$demo)
+    updateRadioButtons(session, "source", selected = "proj")
+    updateTextInput(session, "project", value = "mediawiki")
+    updateTextInput(session, "api", value = "www.mediawiki.org/w/api.php")
   })
 
   observe({
@@ -77,6 +67,7 @@ shinyServer(function(input, output, session) {
           }
           sentiment_breakdown(results)
           msg(sprintf("%.0f topics parsed", length(unique(results$topic))))
+          endpoint_output(NULL)
         }, error = function(e) {
           msg("encountered an issue")
         })
@@ -164,6 +155,32 @@ shinyServer(function(input, output, session) {
 
   output$api_call <- renderUI({
     pre(sprintf("https://sentimentalk.wmflabs.org/analyze?page_name=%s&api=%s", urltools::url_encode(input$page_name), input$api))
+  })
+
+  output$api_output <- renderText({
+    endpoint_output()
+  })
+
+  observe({
+    if (input$use_api > 0) {
+      isolate({
+        result <- httr::GET(
+          "https://sentimentalk.wmflabs.org/analyze",
+          query = list(
+            page_name = input$page_name,
+            api = input$api
+          ),
+          httr::user_agent("https://bearloga.shinyapps.io/sentimentalkr")
+        )
+        tryCatch({
+          httr::stop_for_status(result)
+          endpoint_output(jsonlite::prettify(httr::content(result, as = "text")))
+        },
+        error = function(e) {
+          msg(as.character(e))
+        })
+      })
+    }
   })
 
 })

@@ -18,17 +18,26 @@ function(request) {
         conditionalPanel("input.source == 'proj'",
                          selectInput("project", "Project",
                                      choices = c("MediaWiki" = "mediawiki")),
-                         selectInput("language", "Language Code",
-                                     choices = c("None" = "-"))),
-        fluidRow(
-          column(actionButton("demo_btn", "Demo", icon = icon("eye"), width = "100px"), align = "center", width = 6),
-          column(actionButton("analyze_btn", "Analyze", icon = icon("refresh"), width = "100px"), align = "center", width = 6)
-        ),
+                         conditionalPanel("input.project == 'MediaWiki'",
+                                          selectInput("language", "Language Code",
+                                                      choices = c("None" = "-")))),
+        selectInput("demo", "Demo Talk Pages", choices = c(
+          "Talk:Cross-wiki Search Result Improvements",
+          "Talk:Wikipedia.org Portal A/B testing",
+          "Talk:TextCat",
+          "Talk:Flow",
+          "Talk:VisualEditor",
+          "Talk:Wikimedia Product",
+          "Talk:Beta Features"
+        )),
         br(),
         fluidRow(
-          column(actionButton("random_btn", "Random", icon = icon("random"), width = "100px"), align = "center", width = 6),
-          column(bookmarkButton(label = "Link", width = "100px"), align = "center", width = 6)
+          column(actionButton("random_btn", "Random", icon = icon("random")), align = "center", width = 6),
+          column(bookmarkButton(label = "Bookmark"), align = "center", width = 6)
         ),
+        br(),
+        div(actionButton("analyze_btn", "Analyze Talk Page", icon = icon("refresh")),
+            style = "text-align: center;"),
         br(),
         div(textOutput("message"), style = "text-align: center;")
       ),
@@ -43,7 +52,8 @@ function(request) {
                      column(checkboxInput("topics_include", "Include \"none/other\"", TRUE), width = 4)
                    ),
                    br(),
-                   plotOutput("breakdown_topic")),
+                   plotOutput("breakdown_topic"),
+                   icon = icon("indent")),
           tabPanel("Sentiment by Participant",
                    br(),
                    fluidRow(
@@ -51,14 +61,19 @@ function(request) {
                      column(checkboxInput("participants_include", "Include \"none/other\"", TRUE), width = 4)
                    ),
                    br(),
-                   plotOutput("breakdown_participant")),
+                   plotOutput("breakdown_participant"),
+                   icon = icon("user")),
           tabPanel("API Endpoint Usage",
                    br(),
                    p("You can access the raw output using the API endpoint:"),
                    htmlOutput("api_call"),
                    p("It will output JSON-formatted sentiment breakdown. See",
                      a("GitHub/bearloga/wmf-wmhack17/api", href = "https://github.com/bearloga/wmf-wmhack17/tree/master/api"),
-                     "for more details."))
+                     "for more details."),
+                   actionButton("use_api", "Make API call and show JSON output"),
+                   br(),
+                   verbatimTextOutput("api_output"),
+                   icon = icon("gears"))
         )
       )
     ),
