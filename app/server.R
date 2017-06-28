@@ -80,6 +80,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$breakdown_overall <- renderPlot({
+    req(sentiment_breakdown())
     sentiment_data <- sentiment_breakdown()
     isolate({
       sentiment_data %>%
@@ -106,6 +107,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$breakdown_topic <- renderPlot({
+    req(input$topic, sentiment_breakdown())
     topic <- dplyr::filter(sentiment_breakdown(), topic == input$topic)
     total_posts <- max(topic$post)
     total_words <- sum(topic$`total non-stopwords`)
@@ -130,6 +132,7 @@ shinyServer(function(input, output, session) {
   })
 
   output$breakdown_participant <- renderPlot({
+    req(input$participant, sentiment_breakdown())
     participant <- dplyr::filter(sentiment_breakdown(), participant == input$participant)
     total_posts <- max(participant$post)
     total_words <- sum(participant$`total non-stopwords`)
